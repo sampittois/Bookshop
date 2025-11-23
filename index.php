@@ -17,3 +17,11 @@ $controller = new HomeController($bookRepo);
 
 // laad de homepage
 $controller->index();
+
+
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=bookshop", "root", "");
+    echo "Database connectie OK!";
+} catch (Exception $e) {
+    echo "Fout: " . $e->getMessage();
+}
