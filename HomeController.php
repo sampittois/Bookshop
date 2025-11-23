@@ -1,18 +1,22 @@
 <?php
+require_once "BookRepository.php";
+require_once "CategoryRepository.php";
 
 class HomeController {
-
     private BookRepository $bookRepo;
+    private CategoryRepository $categoryRepo;
 
-    public function __construct(BookRepository $bookRepo) {
+    public function __construct(BookRepository $bookRepo, CategoryRepository $categoryRepo) {
         $this->bookRepo = $bookRepo;
+        $this->categoryRepo = $categoryRepo;
     }
 
     public function index() {
-        // haal boeken op via repository
-        $books = $this->bookRepo->getLatestBooks();
+        $selectedCategory = isset($_GET['category']) ? (int)$_GET['category'] : null;
 
-        // laad de homepage view en geef boeken door
-        include __DIR__ . "/views/home.php";
+        $books = $this->bookRepo->getLatestBooks(6, $selectedCategory);
+        $categories = $this->categoryRepo->getAllCategories();
+
+        require "views/home.php";
     }
 }

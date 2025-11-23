@@ -1,7 +1,7 @@
 <?php
-
 require "Book.php";
 require "BookRepository.php";
+require "CategoryRepository.php";
 require "HomeController.php";
 
 // database connectie
@@ -11,17 +11,9 @@ $pdo = new PDO(
     ""
 );
 
-
 $bookRepo = new BookRepository($pdo);
-$controller = new HomeController($bookRepo);
+$categoryRepo = new CategoryRepository($pdo);
+$controller = new HomeController($bookRepo, $categoryRepo);
 
 // laad de homepage
 $controller->index();
-
-
-// try {
-//     $pdo = new PDO("mysql:host=localhost;dbname=bookshop", "root", "");
-//     echo "Database connectie OK!";
-// } catch (Exception $e) {
-//     echo "Fout: " . $e->getMessage();
-// }
