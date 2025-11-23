@@ -17,7 +17,7 @@
 <div class="book-grid">
     <?php foreach ($books as $book): ?>
         <div class="book">
-            <img src="uploads/<?= htmlspecialchars($book->getImage()) ?>" alt="<?= htmlspecialchars($book->getTitle()) ?>">
+            <img src="<?= htmlspecialchars($book->getImage()) ?>" alt="<?= htmlspecialchars($book->getTitle()) ?>">
             <h3><?= htmlspecialchars($book->getTitle()) ?></h3>
             <p>€<?= number_format($book->getPrice(), 2, ',', '.') ?></p>
         </div>
