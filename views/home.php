@@ -2,7 +2,6 @@
 $db = new PDO("mysql:host=localhost;dbname=bookshop;charset=utf8", "root", "");
 
 // Lees URL filters
-
 $selectedCategory = $_GET['category'] ?? '';
 $searchTerm       = $_GET['search'] ?? '';
 $sort             = $_GET['sort'] ?? '';
@@ -77,10 +76,16 @@ $books = array_slice($allBooks, 0, 4); // of aparte query
         <div class="book">
             <img src="<?= htmlspecialchars($book->cover_image) ?>" alt="<?= htmlspecialchars($book->title) ?>">
             <h3><?= htmlspecialchars($book->title) ?></h3>
-            <h4><?= htmlspecialchars($author->name) ?></h4>
+
+            <h4>
+                <?php foreach ($book->authors as $author): ?>
+                    <?= htmlspecialchars($author->name) ?><br>
+                <?php endforeach; ?>
+            </h4>
         </div>
     <?php endforeach; ?>
 </div>
+
 
 <!-- Bibliotheek -->
 <div class="library-section">
