@@ -2,6 +2,7 @@
 require "Book.php";
 require "BookRepository.php";
 require "CategoryRepository.php";
+require "AuthorRepository.php";
 require "HomeController.php";
 
 // database connectie
@@ -13,7 +14,10 @@ $pdo = new PDO(
 
 $bookRepo = new BookRepository($pdo);
 $categoryRepo = new CategoryRepository($pdo);
-$controller = new HomeController($bookRepo, $categoryRepo);
+$authorRepo = new AuthorRepository($pdo);
+
+$controller = new HomeController($bookRepo, $categoryRepo, $authorRepo);
+
 
 // laad de homepage
 $controller->index();
