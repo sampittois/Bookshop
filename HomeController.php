@@ -20,17 +20,16 @@ class HomeController {
         $search           = $_GET['search'] ?? null;
         $sort             = $_GET['sort'] ?? null;
 
-        // Load books
-        $books     = $this->bookRepo->getLatestBooks(6, $selectedCategory);
-        $allBooks  = $this->bookRepo->getFilteredBooks($selectedCategory, $search, $sort);
+        // Load filtered books (search, category, sort)
+        $books = $this->bookRepo->getFilteredBooks($selectedCategory, $search, $sort);
 
-        // Attach authors to every book object
-        $books    = $this->bookRepo->attachAuthors($books, $this->authorRepo);
-        $allBooks = $this->bookRepo->attachAuthors($allBooks, $this->authorRepo);
+        // Attach authors
+        $books = $this->bookRepo->attachAuthors($books, $this->authorRepo);
 
-        // Load categories
+        // Load categories for filter dropdown
         $categories = $this->categoryRepo->getAllCategories();
 
+        // Load the view
         require "views/home.php";
     }
 }
