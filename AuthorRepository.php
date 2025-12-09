@@ -9,7 +9,7 @@ class AuthorRepository
         $this->pdo = $pdo;
     }
 
-    public function getAuthorsByBookId($bookId): array
+    public function getAuthorsByBookId($bookId)
     {
         $stmt = $this->pdo->prepare("
             SELECT a.*
