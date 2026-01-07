@@ -125,7 +125,7 @@ function coverOrPlaceholder(?string $cover): string
             <div class="book-card__body">
               <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
               <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
-              <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+              <p class="book-card__author">by <?= htmlspecialchars($book['author_names'] ?? 'Unknown author') ?></p>
               <div class="book-card__meta">
                 <span class="badge">New</span>
                 <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>
@@ -212,7 +212,7 @@ function coverOrPlaceholder(?string $cover): string
                 <div class="book-card__body">
                   <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
                   <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
-                  <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+                  <p class="book-card__author">by <?= htmlspecialchars($book['author_names'] ?? 'Unknown author') ?></p>
                   <p class="book-card__desc"><?= htmlspecialchars($book['description'] ?? 'No description available yet.') ?></p>
                   <div class="book-card__meta">
                     <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>

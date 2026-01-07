@@ -27,7 +27,7 @@ echo '<div class="book-grid" role="list">';
 foreach ($books as $book) {
     $id = htmlspecialchars((string) $book['id']);
     $title = htmlspecialchars($book['title'] ?? '');
-    $author = htmlspecialchars($book['author'] ?? 'Unknown author');
+  $author = htmlspecialchars($book['author_names'] ?? 'Unknown author');
     $categoryName = htmlspecialchars($book['category'] ?? 'Uncategorized');
     $desc = htmlspecialchars($book['description'] ?? 'No description available yet.');
     $price = number_format((float) ($book['price'] ?? 0), 2);

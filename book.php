@@ -77,7 +77,7 @@ function coverOrPlaceholder(?string $cover): string {
         <div class="detail__body">
           <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
           <h1 class="detail__title"><?= htmlspecialchars($book['title']) ?></h1>
-          <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+          <p class="book-card__author">by <?= htmlspecialchars($book['author_names'] ?? 'Unknown author') ?></p>
           <p class="detail__description"><?= htmlspecialchars($book['description'] ?? 'No description available yet.') ?></p>
           <div class="detail__meta">
             <span class="pill">Stock: <?= htmlspecialchars($book['stock'] ?? '—') ?></span>

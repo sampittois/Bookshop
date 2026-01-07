@@ -8,18 +8,25 @@ class Book {
 
     public function getAll() {
         return $this->db->query("
-            SELECT books.*, categories.name AS category
+            SELECT books.*, categories.name AS category,
+                   GROUP_CONCAT(authors.name SEPARATOR ', ') AS author_names
             FROM books
             LEFT JOIN categories ON books.category_id = categories.id
+            LEFT JOIN book_authors ON books.id = book_authors.book_id
+            LEFT JOIN authors ON book_authors.author_id = authors.id
+            GROUP BY books.id
             ORDER BY books.title ASC
         ")->fetchAll();
     }
 
     public function getFiltered(?int $categoryId, string $searchTerm = '', string $sort = ''): array {
         $query = "
-            SELECT books.*, categories.name AS category
+            SELECT books.*, categories.name AS category,
+                   GROUP_CONCAT(authors.name SEPARATOR ', ') AS author_names
             FROM books
             LEFT JOIN categories ON books.category_id = categories.id
+            LEFT JOIN book_authors ON books.id = book_authors.book_id
+            LEFT JOIN authors ON book_authors.author_id = authors.id
             WHERE 1=1
         ";
         $params = [];
@@ -33,6 +40,8 @@ class Book {
             $query .= " AND books.title LIKE :search";
             $params['search'] = "%$searchTerm%";
         }
+
+        $query .= " GROUP BY books.id";
 
         switch ($sort) {
             case 'name_asc':
@@ -65,11 +74,15 @@ class Book {
     }
 
     public function getById($id) {
-        $stmt = $this->db->prepare("\
-            SELECT books.*, categories.name AS category
+        $stmt = $this->db->prepare("
+            SELECT books.*, categories.name AS category,
+                   GROUP_CONCAT(authors.name SEPARATOR ', ') AS author_names
             FROM books
             LEFT JOIN categories ON books.category_id = categories.id
+            LEFT JOIN book_authors ON books.id = book_authors.book_id
+            LEFT JOIN authors ON book_authors.author_id = authors.id
             WHERE books.id = ?
+            GROUP BY books.id
             LIMIT 1
         ");
         $stmt->execute([$id]);
@@ -79,18 +92,26 @@ class Book {
     public function getByIds(array $ids): array {
         if (empty($ids)) return [];
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $stmt = $this->db->prepare("SELECT books.*, categories.name AS category
+        $stmt = $this->db->prepare("SELECT books.*, categories.name AS category,
+                   GROUP_CONCAT(authors.name SEPARATOR ', ') AS author_names
             FROM books
             LEFT JOIN categories ON books.category_id = categories.id
-            WHERE books.id IN ($placeholders)");
+            LEFT JOIN book_authors ON books.id = book_authors.book_id
+            LEFT JOIN authors ON book_authors.author_id = authors.id
+            WHERE books.id IN ($placeholders)
+            GROUP BY books.id");
         $stmt->execute($ids);
         return $stmt->fetchAll();
     }
 
     public function getNewArrivals(int $limit = 6): array {
-        $stmt = $this->db->prepare("SELECT books.*, categories.name AS category
+        $stmt = $this->db->prepare("SELECT books.*, categories.name AS category,
+                   GROUP_CONCAT(authors.name SEPARATOR ', ') AS author_names
             FROM books
             LEFT JOIN categories ON books.category_id = categories.id
+            LEFT JOIN book_authors ON books.id = book_authors.book_id
+            LEFT JOIN authors ON book_authors.author_id = authors.id
+            GROUP BY books.id
             ORDER BY books.id DESC
             LIMIT ?");
         $stmt->bindValue(1, $limit, PDO::PARAM_INT);

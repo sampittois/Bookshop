@@ -125,7 +125,7 @@ function coverOrPlaceholder(?string $cover): string {
               </div>
               <div class="cart__info">
                 <h2 class="cart__title"><?= htmlspecialchars($book['title']) ?></h2>
-                <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+                <p class="book-card__author">by <?= htmlspecialchars($book['author_names'] ?? 'Unknown author') ?></p>
                 <p class="book-card__category">Category: <?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
                 <div class="cart__meta">
                   <span class="pill">Price: €<?= number_format($book['price'], 2) ?></span>

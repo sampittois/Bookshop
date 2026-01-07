@@ -63,7 +63,7 @@ $books = $bookModel->getAll();
           <div class="book-card__body">
             <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
             <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
-            <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+            <p class="book-card__author">by <?= htmlspecialchars($book['author_names'] ?? 'Unknown author') ?></p>
             <div class="book-card__meta">
               <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>
               <span class="pill">Stock: <?= htmlspecialchars($book['stock'] ?? '—') ?></span>
