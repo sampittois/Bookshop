@@ -59,7 +59,6 @@ foreach ($books as $book) {
 }
 echo '</div>';
 
-<?php
 // Include database configuration
 include('../config.php');
 
@@ -85,4 +84,3 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Return the results as JSON
 header('Content-Type: application/json');
 echo json_encode($books);
-?>
