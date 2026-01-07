@@ -108,7 +108,7 @@ img {
 .nav__links a[aria-current="page"],
 .nav__links a:hover,
 .nav__links a:focus-visible {
-  background: rgba(255, 179, 107, 0.14);
+  background: var(--accent);
   color: var(--ink);
   outline: 2px solid transparent;
 }
