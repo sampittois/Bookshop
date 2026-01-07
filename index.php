@@ -66,9 +66,15 @@ $books = $book->getAll();
     <div class="books-grid">
       <?php foreach ($books as $b): ?>
         <div class="book-card">
-          <h3><?= htmlspecialchars($b['title']) ?></h3>
-          <p>€<?= number_format($b['price'], 2) ?></p>
-          <a href="book.php?id=<?= $b['id'] ?>">View Details</a>
+          <div class="book-card__cover">
+            <img src="<?= htmlspecialchars($b['cover_image'] ?? './img/placeholder.png') ?>" alt="Cover of <?= htmlspecialchars($b['title']) ?>">
+          </div>
+          <div class="book-card__body">
+            <h3 class="book-card__title"><?= htmlspecialchars($b['title']) ?></h3>
+            <p class="book-card__author">by <?= htmlspecialchars($b['author'] ?? 'Unknown Author') ?></p>
+            <p class="book-card__price">€<?= number_format($b['price'], 2) ?></p>
+            <a class="btn btn--small" href="book.php?id=<?= $b['id'] ?>">View Details</a>
+          </div>
         </div>
       <?php endforeach; ?>
     </div>
