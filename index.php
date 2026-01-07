@@ -1,11 +1,10 @@
-<?php 
+<?php
 require_once "config.php";
 
 // Auto-create default users if they don't exist
 try {
     $user = new User();
-    
-    // Create admin user if not exists
+
     $user->createUser(
         'Admin User',
         'admin@admin.com',
@@ -13,8 +12,7 @@ try {
         'admin',
         1000.00
     );
-    
-    // Create regular user if not exists
+
     $user->createUser(
         'Regular User',
         'user@user.com',
@@ -26,60 +24,255 @@ try {
     // Users already exist or error, continue
 }
 
-// Check if user is logged in, otherwise redirect to login
 if (!User::isLoggedIn()) {
     header("Location: auth/login.php");
     exit();
 }
 
-$book = new Book();
-$books = $book->getAll();
+$db = Database::connect();
+
+$selectedCategory = $_GET['category'] ?? '';
+$searchTerm = $_GET['search'] ?? '';
+$sort = $_GET['sort'] ?? '';
+
+$categories = $db->query("SELECT id, name FROM categories ORDER BY name ASC")
+    ->fetchAll(PDO::FETCH_ASSOC);
+
+$baseQuery = "
+    SELECT b.*, c.name AS category
+    FROM books b
+    LEFT JOIN categories c ON c.id = b.category_id
+    WHERE 1=1
+";
+
+$params = [];
+
+if (!empty($selectedCategory)) {
+    $baseQuery .= " AND b.category_id = :category";
+    $params['category'] = $selectedCategory;
+}
+
+if (!empty($searchTerm)) {
+    $baseQuery .= " AND b.title LIKE :search";
+    $params['search'] = "%$searchTerm%";
+}
+
+$orderBy = '';
+switch ($sort) {
+    case 'name_asc':
+        $orderBy = ' ORDER BY b.title ASC';
+        break;
+    case 'name_desc':
+        $orderBy = ' ORDER BY b.title DESC';
+        break;
+    case 'price_low':
+        $orderBy = ' ORDER BY b.price ASC';
+        break;
+    case 'price_high':
+        $orderBy = ' ORDER BY b.price DESC';
+        break;
+    default:
+        $orderBy = ' ORDER BY b.title ASC';
+        break;
+}
+
+$libraryStmt = $db->prepare($baseQuery . $orderBy);
+$libraryStmt->execute($params);
+$libraryBooks = $libraryStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$newArrivalsStmt = $db->query("
+    SELECT b.*, c.name AS category
+    FROM books b
+    LEFT JOIN categories c ON c.id = b.category_id
+    ORDER BY b.id DESC
+    LIMIT 6
+");
+$newArrivals = $newArrivalsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+function coverOrPlaceholder(?string $cover): string {
+    return $cover && trim($cover) !== '' ? $cover : './img/placeholder.png';
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="./style/style.css">
-  <title>Bookshop</title>
+  <title>Bookshop · Home</title>
 </head>
 
 <body>
-  <header>
-    <nav class="nav">
-      <a href="index.php">Browse</a>
-      <div class="loggedIn">
-        <div class="user--avatar"><img src="./img/pfp.jpeg" alt=""></div>
+  <header class="topbar" role="banner">
+    <nav class="nav" aria-label="Primary">
+      <div class="brand">
+        <div class="brand__mark" aria-hidden="true">📚</div>
+        <div>
+          <span class="brand__kicker">Curated Reads</span>
+          <span class="brand__title">Bookshop</span>
+        </div>
+      </div>
+      <div class="nav__links" role="list">
+        <a role="listitem" href="index.php" aria-current="page">Home</a>
+        <a role="listitem" href="admin/books.php">Manage</a>
+        <a role="listitem" href="cart.php">Cart</a>
+      </div>
+      <div class="loggedIn" aria-label="Signed in user">
+        <div class="user--avatar" aria-hidden="true"><img src="./img/pfp.jpeg" alt=""></div>
         <div>
           <h3 class="user--name"><?= htmlspecialchars($_SESSION['user']['name']) ?></h3>
           <span class="user--status"><?= User::isAdmin() ? 'Admin' : 'Customer' ?></span>
         </div>
+        <a class="btn btn--ghost" href="auth/logout.php">Log out</a>
       </div>
-      <a href="auth/logout.php">Log out</a>
     </nav>
   </header>
 
-  <div class="books-container">
-    <h1 class="page-title">Browse Our Books</h1>
-    <div class="books-grid">
-      <?php foreach ($books as $b): ?>
-        <div class="book-card">
-          <div class="book-card__cover">
-            <img src="<?= htmlspecialchars($b['cover_image'] ?? './img/placeholder.png') ?>" alt="Cover of <?= htmlspecialchars($b['title']) ?>">
-          </div>
-          <div class="book-card__body">
-            <h3 class="book-card__title"><?= htmlspecialchars($b['title']) ?></h3>
-            <p class="book-card__author">by <?= htmlspecialchars($b['author'] ?? 'Unknown Author') ?></p>
-            <p class="book-card__price">€<?= number_format($b['price'], 2) ?></p>
-            <a class="btn btn--small" href="book.php?id=<?= $b['id'] ?>">View Details</a>
-          </div>
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__copy">
+        <p class="eyebrow">Fresh on the shelves</p>
+        <h1 id="hero-title">Discover books that keep you turning the page.</h1>
+        <p class="lede">Browse new arrivals, filter by category, search by title, and sort by what matters to you.</p>
+        <div class="hero__actions">
+          <a class="btn" href="#library" aria-label="Jump to the library">Browse library</a>
+          <a class="btn btn--ghost" href="#new">See new arrivals</a>
         </div>
-      <?php endforeach; ?>
-    </div>
-  </div>
+      </div>
+      <div class="hero__stat" aria-live="polite">
+        <span class="stat__label">Books available</span>
+        <span class="stat__value"><?= count($libraryBooks) ?></span>
+        <span class="stat__hint">Filtered in real time</span>
+      </div>
+    </section>
 
+    <section class="filters" aria-label="Library filters">
+      <form class="filter" method="get" action="">
+        <label for="category">Category</label>
+        <select id="category" name="category" onchange="this.form.submit()">
+          <option value="">All categories</option>
+          <?php foreach ($categories as $category): ?>
+            <option value="<?= htmlspecialchars($category['id']) ?>" <?= $selectedCategory == $category['id'] ? 'selected' : '' ?>>
+              <?= htmlspecialchars($category['name']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </form>
+
+      <form class="filter filter--wide" method="get" action="">
+        <input type="hidden" name="category" value="<?= htmlspecialchars($selectedCategory) ?>">
+        <label class="sr-only" for="search">Search by title</label>
+        <div class="input-group">
+          <span aria-hidden="true">🔍</span>
+          <input
+            id="search"
+            name="search"
+            type="text"
+            value="<?= htmlspecialchars($searchTerm) ?>"
+            placeholder="Search by title..."
+            aria-label="Search books by title"
+          >
+        </div>
+        <button class="btn" type="submit">Search</button>
+      </form>
+
+      <form class="filter" method="get" action="">
+        <input type="hidden" name="category" value="<?= htmlspecialchars($selectedCategory) ?>">
+        <input type="hidden" name="search" value="<?= htmlspecialchars($searchTerm) ?>">
+        <label for="sort">Sort</label>
+        <select id="sort" name="sort" onchange="this.form.submit()">
+          <option value="">Title (A-Z)</option>
+          <option value="name_desc" <?= $sort === 'name_desc' ? 'selected' : '' ?>>Title (Z-A)</option>
+          <option value="price_low" <?= $sort === 'price_low' ? 'selected' : '' ?>>Price (Low-High)</option>
+          <option value="price_high" <?= $sort === 'price_high' ? 'selected' : '' ?>>Price (High-Low)</option>
+          <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>Title (A-Z)</option>
+        </select>
+      </form>
+    </section>
+
+    <section id="new" class="section" aria-labelledby="new-title">
+      <div class="section__head">
+        <div>
+          <p class="eyebrow">Just in</p>
+          <h2 id="new-title">New arrivals</h2>
+          <p class="section__hint">Handpicked highlights — updated automatically.</p>
+        </div>
+        <div class="section__pill">Showing <?= count($newArrivals) ?> books</div>
+      </div>
+      <div class="carousel" role="list">
+        <?php foreach ($newArrivals as $book): ?>
+          <article class="book-card" role="listitem">
+            <div class="book-card__cover">
+              <img
+                src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>"
+                alt="Cover of <?= htmlspecialchars($book['title']) ?>"
+                loading="lazy"
+              >
+            </div>
+            <div class="book-card__body">
+              <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
+              <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
+              <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+              <div class="book-card__meta">
+                <span class="badge">New</span>
+                <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>
+              </div>
+              <a class="btn btn--small" href="book.php?id=<?= $book['id'] ?>">View details</a>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    </section>
+
+    <section id="library" class="section" aria-labelledby="library-title">
+      <div class="section__head">
+        <div>
+          <p class="eyebrow">Full library</p>
+          <h2 id="library-title">Browse everything</h2>
+          <p class="section__hint">Filtered by your criteria — sorted <?= $sort ? htmlspecialchars($sort) : 'A-Z' ?>.</p>
+        </div>
+        <div class="section__pill"><?= count($libraryBooks) ?> titles</div>
+      </div>
+
+      <?php if (empty($libraryBooks)): ?>
+        <div class="empty-state" role="status">
+          <p>No books match your filters yet. Try clearing the search or picking a different category.</p>
+          <a class="btn btn--ghost" href="index.php">Reset filters</a>
+        </div>
+      <?php else: ?>
+        <div class="book-grid" role="list">
+          <?php foreach ($libraryBooks as $book): ?>
+            <article class="book-card" role="listitem">
+              <div class="book-card__cover">
+                <img
+                  src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>"
+                  alt="Cover of <?= htmlspecialchars($book['title']) ?>"
+                  loading="lazy"
+                >
+              </div>
+              <div class="book-card__body">
+                <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
+                <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
+                <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+                <p class="book-card__desc"><?= htmlspecialchars($book['description'] ?? 'No description available yet.') ?></p>
+                <div class="book-card__meta">
+                  <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>
+                  <span class="pill">In stock: <?= htmlspecialchars($book['stock'] ?? '—') ?></span>
+                </div>
+                <div class="book-card__actions">
+                  <a class="btn btn--small" href="book.php?id=<?= $book['id'] ?>">View details</a>
+                  <form method="post" action="ajax/addToCart.php" class="inline-form">
+                    <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
+                    <button class="btn btn--outline btn--small" type="submit">Add to cart</button>
+                  </form>
+                </div>
+              </div>
+            </article>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </section>
+  </main>
 </body>
-
 </html>
