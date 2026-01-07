@@ -1,6 +1,7 @@
 <?php
 class User {
     private PDO $db;
+    private const BCRYPT_COST = 12; // Higher cost = stronger hashing but slower
 
     public function __construct() {
         $this->db = Database::connect();
@@ -19,8 +20,8 @@ class User {
             $stmt->execute([$email]);
         }
 
-        // Hash password with bcrypt (automatically includes salt)
-        $hash = password_hash($password, PASSWORD_DEFAULT);
+        // Hash password with bcrypt with explicit cost and automatic salt
+        $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => self::BCRYPT_COST]);
 
         $stmt = $this->db->prepare("
             INSERT INTO users (name, email, password_hash, role, balance)
@@ -34,8 +35,8 @@ class User {
         $stmt->execute([$email]);
         if ($stmt->fetch()) return false;
 
-        // password_hash uses bcrypt with automatic salting
-        $hash = password_hash($password, PASSWORD_DEFAULT);
+        // Hash password with bcrypt with explicit cost and automatic salt
+        $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => self::BCRYPT_COST]);
 
         $stmt = $this->db->prepare("
             INSERT INTO users (name, email, password_hash, role, balance)
@@ -46,7 +47,7 @@ class User {
 
     /**
      * Login user with email and password
-     * password_verify automatically handles the salt stored in the hash
+     * password_verify automatically extracts and uses the salt stored in the hash
      */
     public function login($email, $password) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
@@ -68,7 +69,7 @@ class User {
         if (!$hash || !password_verify($current, $hash)) {
             return false;
         }
-        $newHash = password_hash($new, PASSWORD_DEFAULT);
+        $newHash = password_hash($new, PASSWORD_BCRYPT, ['cost' => self::BCRYPT_COST]);
         $update = $this->db->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
         return $update->execute([$newHash, $userId]);
     }

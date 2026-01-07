@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 07, 2026 at 11:06 PM
+-- Generation Time: Jan 07, 2026 at 11:36 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -51,7 +51,8 @@ INSERT INTO `authors` (`id`, `name`, `bio`, `created_at`) VALUES
 (10, 'Abby Jimenez', NULL, '2025-11-30 11:43:09'),
 (11, 'Clare Leslie Hall', NULL, '2025-11-30 11:43:09'),
 (12, 'Lauren Roberts', NULL, '2025-11-30 11:43:09'),
-(13, 'Freida McFadden', NULL, '2025-11-30 11:43:09');
+(13, 'Freida McFadden', NULL, '2025-11-30 11:43:09'),
+(14, 'Demo', NULL, '2026-01-07 23:14:03');
 
 -- --------------------------------------------------------
 
@@ -168,6 +169,13 @@ CREATE TABLE `orders` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `total_price`, `status`, `created_at`) VALUES
+(1, 312, 10.00, 'paid', '2026-01-07 23:28:45');
+
 -- --------------------------------------------------------
 
 --
@@ -197,6 +205,13 @@ CREATE TABLE `reviews` (
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `reviews`
+--
+
+INSERT INTO `reviews` (`id`, `user_id`, `book_id`, `rating`, `comment`, `created_at`) VALUES
+(1, 312, 12, 5, 'Grote fan van de worlbuilding', '2026-01-07 23:30:00');
+
 -- --------------------------------------------------------
 
 --
@@ -218,9 +233,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role`, `created_at`, `balance`) VALUES
-(285, 'Sam', 'sam@shop.com', '$2y$10$OQ.aMvJ0RnsikaewEkhGuuVwm68qS38wy6g.lPFNzB.k.BSUaCYwG', 'customer', '2026-01-07 17:58:19', 100.00),
-(308, 'Admin User', 'admin@admin.com', '$2y$10$rp.GN2GJlSWxmQEy5NHx6e9xsQ52T0Wm/Wgl4uxaVQR6RtuzqEIWm', 'admin', '2026-01-07 21:14:07', 1000.00),
-(309, 'Regular User', 'user@user.com', '$2y$10$QyqPqlgimQqcAQ0jK8Rhj.9vzsMs/C6GIHN.Joi/QK8AEUPKWypP.', 'customer', '2026-01-07 21:14:07', 100.00);
+(341, 'Admin', 'admin@admin.com', '$2y$12$liAhF9WYFsZxtlj2TF84cuT7Cuoz2GRJc/4yKLIa531U41g879PSi', 'admin', '2026-01-07 23:34:56', 1000.00),
+(342, 'User', 'user@user.com', '$2y$12$JR3TOP97ZWUeyiznuJPveeWjwfP0L9.lSSnj9.egG51XGrKvilA6.', 'customer', '2026-01-07 23:34:57', 100.00);
 
 -- --------------------------------------------------------
 
@@ -318,13 +332,13 @@ ALTER TABLE `wishlist`
 -- AUTO_INCREMENT for table `authors`
 --
 ALTER TABLE `authors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -336,25 +350,25 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=310;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=343;
 
 --
 -- Constraints for dumped tables

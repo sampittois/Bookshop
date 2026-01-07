@@ -24,10 +24,8 @@ try {
   // Users already exist or error, continue
 }
 
-if (!User::isLoggedIn()) {
-  header("Location: auth/login.php");
-  exit();
-}
+// No login requirement - allow browsing without logging in
+
 
 $db = Database::connect();
 $categoryModel = new Category();

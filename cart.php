@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
 require_once "config.php";
 
 if (!User::isLoggedIn()) {
@@ -33,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           Cart::clear();
           $flash = 'Order placed!';
         } catch (Exception $e) {
-          $flash = $e->getMessage();
+          $flash = 'Error: ' . $e->getMessage();
         }
         } else {
             $flash = 'Your cart is empty.';

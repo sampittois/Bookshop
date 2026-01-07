@@ -132,7 +132,30 @@ class Book {
     }
 
     public function delete($id) {
-        $stmt = $this->db->prepare("DELETE FROM books WHERE id=?");
-        return $stmt->execute([$id]);
+        try {
+            $this->db->beginTransaction();
+            
+            // Delete author associations first
+            $stmt = $this->db->prepare("DELETE FROM book_authors WHERE book_id = ?");
+            $stmt->execute([$id]);
+            
+            // Delete order items that reference this book
+            $stmt = $this->db->prepare("DELETE FROM order_items WHERE book_id = ?");
+            $stmt->execute([$id]);
+            
+            // Delete reviews for this book
+            $stmt = $this->db->prepare("DELETE FROM reviews WHERE book_id = ?");
+            $stmt->execute([$id]);
+            
+            // Finally delete the book
+            $stmt = $this->db->prepare("DELETE FROM books WHERE id=?");
+            $stmt->execute([$id]);
+            
+            $this->db->commit();
+            return true;
+        } catch (PDOException $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
     }
 }

@@ -63,6 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="submit" value="Sign in" class="btn btn--primary">
                 </div>
             </form>
+            <p style="text-align: center; margin-top: 1rem;">
+                <a href="../index.php" style="text-decoration: none; color: #666;">Browse books without logging in</a>
+            </p>
         </div>
     </div>
 </body>
