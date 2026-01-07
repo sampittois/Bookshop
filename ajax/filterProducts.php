@@ -49,10 +49,14 @@ foreach ($books as $book) {
     echo '    </div>';
     echo '    <div class="book-card__actions">';
     echo '      <a class="btn btn--small" href="../book.php?id=' . $id . '">View details</a>';
-    echo '      <form method="post" action="addToCart.php" class="inline-form">';
-    echo '        <input type="hidden" name="book_id" value="' . $id . '">';
-    echo '        <button class="btn btn--outline btn--small" type="submit">Add to cart</button>';
-    echo '      </form>';
+    if (User::isLoggedIn()) {
+        echo '      <form method="post" action="ajax/addToCart.php" class="inline-form">';
+        echo '        <input type="hidden" name="book_id" value="' . $id . '">';
+        echo '        <button class="btn btn--outline btn--small" type="submit">Add to cart</button>';
+        echo '      </form>';
+    } else {
+        echo '      <a class="btn btn--outline btn--small" href="auth/login.php">Sign in to buy</a>';
+    }
     echo '    </div>';
     echo '  </div>';
     echo '</article>';

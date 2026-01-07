@@ -27,6 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cover = trim($_POST['cover_image'] ?? '');
     $stock = (int) ($_POST['stock'] ?? 0);
 
+    // Normalize cover image path to always be img/filename.ext
+    if (!empty($cover)) {
+        $cover = preg_replace('#^\\.{1,2}/#', '', $cover);
+        if (strpos($cover, 'img/') !== 0 && strpos($cover, 'http://') !== 0 && strpos($cover, 'https://') !== 0) {
+            $cover = 'img/' . $cover;
+        }
+    }
+
     if ($category <= 0) $errors[] = "Select a category.";
     if ($title === '') $errors[] = "Title is required.";
     if ($price <= 0) $errors[] = "Price must be greater than 0.";

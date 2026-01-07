@@ -120,15 +120,46 @@ class Book {
     }
 
     public function create($data) {
-        $stmt = $this->db->prepare("INSERT INTO books (category_id, title, description, price, cover_image, stock, author)
-            VALUES (?, ?, ?, ?, ?, ?, ?)");
-        return $stmt->execute($data);
+        // $data = [category_id, title, description, price, cover_image, stock, author_name]
+        $bookData = array_slice($data, 0, 6);
+        $authorName = $data[6] ?? '';
+        
+        $stmt = $this->db->prepare("INSERT INTO books (category_id, title, description, price, cover_image, stock)
+            VALUES (?, ?, ?, ?, ?, ?)");
+        
+        if ($stmt->execute($bookData)) {
+            $bookId = $this->db->lastInsertId();
+            
+            // If author name is provided, link it to the book
+            if (!empty($authorName)) {
+                $this->addAuthorToBook($bookId, $authorName);
+            }
+            
+            return true;
+        }
+        return false;
     }
 
     public function update($id, $data) {
-        $stmt = $this->db->prepare("UPDATE books SET category_id=?, title=?, description=?, price=?, cover_image=?, stock=?, author=?
+        // $data = [category_id, title, description, price, cover_image, stock, author_name]
+        $bookData = array_slice($data, 0, 6);
+        $authorName = $data[6] ?? '';
+        
+        $stmt = $this->db->prepare("UPDATE books SET category_id=?, title=?, description=?, price=?, cover_image=?, stock=?
             WHERE id=?");
-        return $stmt->execute([...$data, $id]);
+        
+        if ($stmt->execute([...$bookData, $id])) {
+            // Remove old author associations
+            $this->removeAllAuthorsFromBook($id);
+            
+            // Add new author if provided
+            if (!empty($authorName)) {
+                $this->addAuthorToBook($id, $authorName);
+            }
+            
+            return true;
+        }
+        return false;
     }
 
     public function delete($id) {
@@ -157,5 +188,40 @@ class Book {
             $this->db->rollBack();
             throw $e;
         }
+    }
+
+    /**
+     * Add an author to a book (by author name, creating author if doesn't exist)
+     */
+    private function addAuthorToBook($bookId, $authorName) {
+        $authorModel = new Author();
+        
+        // Try to find existing author
+        $existingAuthors = $authorModel->getAll();
+        $authorId = null;
+        
+        foreach ($existingAuthors as $author) {
+            if (strtolower($author['name']) === strtolower($authorName)) {
+                $authorId = $author['id'];
+                break;
+            }
+        }
+        
+        // Create author if doesn't exist
+        if ($authorId === null) {
+            $authorId = $authorModel->create($authorName);
+        }
+        
+        // Link book to author
+        $stmt = $this->db->prepare("INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)");
+        return $stmt->execute([$bookId, $authorId]);
+    }
+
+    /**
+     * Remove all authors from a book
+     */
+    private function removeAllAuthorsFromBook($bookId) {
+        $stmt = $this->db->prepare("DELETE FROM book_authors WHERE book_id = ?");
+        return $stmt->execute([$bookId]);
     }
 }

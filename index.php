@@ -220,11 +220,15 @@ function coverOrPlaceholder(?string $cover): string
                     <span class="pill">In stock: <?= htmlspecialchars($book['stock'] ?? '—') ?></span>
                   </div>
                   <div class="book-card__actions">
-                    <a class="btn btn--small" href="book.php?id=<?= $book['id'] ?>">View details</a>
-                    <form method="post" action="ajax/addToCart.php" class="inline-form">
-                      <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
-                      <button class="btn btn--outline btn--small" type="submit">Add to cart</button>
-                    </form>
+                    <a class="btn btn--small" href="book.php?id=<?= $book['id'] ?>" onclick="<?= !User::isLoggedIn() ? 'event.preventDefault(); window.location.href=\'auth/login.php\'; return false;' : '' ?>">View details</a>
+                    <?php if (User::isLoggedIn()): ?>
+                      <form method="post" action="ajax/addToCart.php" class="inline-form">
+                        <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
+                        <button class="btn btn--outline btn--small" type="submit">Add to cart</button>
+                      </form>
+                    <?php else: ?>
+                      <a class="btn btn--outline btn--small" href="auth/login.php">Sign in to buy</a>
+                    <?php endif; ?>
                   </div>
                 </div>
               </article>
