@@ -65,7 +65,7 @@ function coverOrPlaceholder(?string $cover): string {
   <header class="topbar" role="banner">
     <nav class="nav" aria-label="Primary">
       <div class="brand">
-        <div class="brand__mark" aria-hidden="true">📚</div>
+        <div class="brand__mark" aria-hidden="true"><img class="logo" src="./img/logo.png" alt=""></div>
         <div>
           <span class="brand__kicker">Curated Reads</span>
           <span class="brand__title">Bookshop</span>

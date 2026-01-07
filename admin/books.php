@@ -23,7 +23,7 @@ $books = $bookModel->getAll();
   <header class="topbar" role="banner">
     <nav class="nav" aria-label="Admin">
       <div class="brand">
-        <div class="brand__mark" aria-hidden="true">📚</div>
+        <div class="brand__mark" aria-hidden="true"><img class="logo" src="./img/logo.png" alt=""></div>
         <div>
           <span class="brand__kicker">Admin</span>
           <span class="brand__title">Bookshop</span>
