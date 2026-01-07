@@ -104,7 +104,40 @@ function coverOrPlaceholder(?string $cover): string
       </div>
     </section>
 
-    <section class="filters" aria-label="Library filters">
+    <section id="new" class="section" aria-labelledby="new-title">
+      <div class="section__head">
+        <div>
+          <p class="eyebrow">Just in</p>
+          <h2 id="new-title">New arrivals</h2>
+          <p class="section__hint">Handpicked highlights — updated automatically.</p>
+        </div>
+        <div class="section__pill">Showing <?= count($newArrivals) ?> books</div>
+      </div>
+      <div class="carousel" role="list">
+        <?php foreach ($newArrivals as $book): ?>
+          <article class="book-card" role="listitem">
+            <div class="book-card__cover">
+              <img
+                src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>"
+                alt="Cover of <?= htmlspecialchars($book['title']) ?>"
+                loading="lazy">
+            </div>
+            <div class="book-card__body">
+              <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
+              <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
+              <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+              <div class="book-card__meta">
+                <span class="badge">New</span>
+                <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>
+              </div>
+              <a class="btn btn--small" href="book.php?id=<?= $book['id'] ?>">View details</a>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      </div>
+    </section>
+
+    <section id="filter" class="filters" aria-label="Library filters">
       <form class="filter" method="get" action="">
         <input type="hidden" name="search" value="<?= htmlspecialchars($searchTerm) ?>">
         <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
@@ -148,39 +181,6 @@ function coverOrPlaceholder(?string $cover): string
           <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>Title (A-Z)</option>
         </select>
       </form>
-    </section>
-
-    <section id="new" class="section" aria-labelledby="new-title">
-      <div class="section__head">
-        <div>
-          <p class="eyebrow">Just in</p>
-          <h2 id="new-title">New arrivals</h2>
-          <p class="section__hint">Handpicked highlights — updated automatically.</p>
-        </div>
-        <div class="section__pill">Showing <?= count($newArrivals) ?> books</div>
-      </div>
-      <div class="carousel" role="list">
-        <?php foreach ($newArrivals as $book): ?>
-          <article class="book-card" role="listitem">
-            <div class="book-card__cover">
-              <img
-                src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>"
-                alt="Cover of <?= htmlspecialchars($book['title']) ?>"
-                loading="lazy">
-            </div>
-            <div class="book-card__body">
-              <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
-              <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
-              <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
-              <div class="book-card__meta">
-                <span class="badge">New</span>
-                <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>
-              </div>
-              <a class="btn btn--small" href="book.php?id=<?= $book['id'] ?>">View details</a>
-            </div>
-          </article>
-        <?php endforeach; ?>
-      </div>
     </section>
 
     <section id="library" class="section" aria-labelledby="library-title">
