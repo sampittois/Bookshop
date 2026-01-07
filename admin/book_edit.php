@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="text" name="title" required value="<?= htmlspecialchars($book['title'] ?? '') ?>">
       </label>
       <label>Author
-        <input type="text" name="author" value="<?= htmlspecialchars($book['author'] ?? '') ?>">
+        <input type="text" name="author" value="<?= htmlspecialchars($book['author_names'] ?? $book['author'] ?? '') ?>">
       </label>
       <label>Description
         <textarea name="description" rows="4"><?= htmlspecialchars($book['description'] ?? '') ?></textarea>

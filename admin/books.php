@@ -10,6 +10,23 @@ $bookModel = new Book();
 $categoryModel = new Category();
 $categories = $categoryModel->getAll();
 $books = $bookModel->getAll();
+
+function coverOrPlaceholder(?string $cover): string
+{
+  if (!$cover || trim($cover) === '') {
+    return '../img/placeholder.png';
+  }
+  // Handle all relative paths for admin subfolder
+  // If starts with ./ remove it and add ../
+  if (strpos($cover, './') === 0) {
+    return '../' . substr($cover, 2);
+  }
+  // If doesn't start with http, https, or ../, assume it's relative and add ../
+  if (strpos($cover, 'http://') !== 0 && strpos($cover, 'https://') !== 0 && strpos($cover, '../') !== 0 && strpos($cover, '/') !== 0) {
+    return '../' . $cover;
+  }
+  return $cover;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,7 +40,7 @@ $books = $bookModel->getAll();
   <header class="topbar" role="banner">
     <nav class="nav" aria-label="Admin">
       <div class="brand">
-        <div class="brand__mark" aria-hidden="true"><img class="logo" src="./img/logo.png" alt=""></div>
+        <div class="brand__mark" aria-hidden="true"><img class="logo" src="../img/logo.png" alt=""></div>
         <div>
           <span class="brand__kicker">Admin</span>
           <span class="brand__title">Bookshop</span>
@@ -58,7 +75,7 @@ $books = $bookModel->getAll();
       <?php foreach ($books as $book): ?>
         <article class="book-card" role="listitem">
           <div class="book-card__cover">
-            <img src="<?= htmlspecialchars($book['cover_image'] ?? '../img/placeholder.png') ?>" alt="Cover of <?= htmlspecialchars($book['title']) ?>">
+            <img src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>" alt="Cover of <?= htmlspecialchars($book['title']) ?>">
           </div>
           <div class="book-card__body">
             <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
