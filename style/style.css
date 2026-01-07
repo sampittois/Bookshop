@@ -637,6 +637,28 @@ img {
   border: 0;
 }
 
+.form--vertical {
+  display: grid;
+  gap: 12px;
+}
+
+.form--vertical label {
+  color: var(--muted);
+  font-weight: 600;
+  display: grid;
+  gap: 6px;
+}
+
+.form--vertical input,
+.form--vertical select,
+.form--vertical textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+}
+
 @media (max-width: 900px) {
   .nav {
     grid-template-columns: 1fr;

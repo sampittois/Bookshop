@@ -6,8 +6,7 @@ if (!User::isLoggedIn()) {
     exit();
 }
 
-$db = Database::connect();
-
+$bookModel = new Book();
 $flash = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -28,10 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'checkout') {
         $cart = Cart::get();
         if (!empty($cart)) {
-            $order = new Order();
-            $order->create($_SESSION['user']['id'], $cart);
-            Cart::clear();
-            $flash = 'Order placed!';
+        $order = new Order();
+        try {
+          $order->create($_SESSION['user']['id'], $cart);
+          Cart::clear();
+          $flash = 'Order placed!';
+        } catch (Exception $e) {
+          $flash = $e->getMessage();
+        }
         } else {
             $flash = 'Your cart is empty.';
         }
@@ -42,12 +45,7 @@ $cart = Cart::get();
 $books = [];
 
 if (!empty($cart)) {
-    $placeholders = implode(',', array_fill(0, count($cart), '?'));
-    $stmt = $db->prepare(
-        "SELECT b.*, c.name AS category FROM books b LEFT JOIN categories c ON c.id = b.category_id WHERE b.id IN ($placeholders)"
-    );
-    $stmt->execute(array_keys($cart));
-    $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  $books = $bookModel->getByIds(array_keys($cart));
 }
 
 function coverOrPlaceholder(?string $cover): string {
@@ -77,6 +75,7 @@ function coverOrPlaceholder(?string $cover): string {
         <a role="listitem" href="index.php">Home</a>
         <a role="listitem" href="admin/books.php">Manage</a>
         <a role="listitem" href="cart.php" aria-current="page">Cart</a>
+        <a role="listitem" href="orders.php">Orders</a>
       </div>
       <div class="loggedIn" aria-label="Signed in user">
         <div class="user--avatar" aria-hidden="true"><img src="./img/pfp.jpeg" alt=""></div>
@@ -84,6 +83,7 @@ function coverOrPlaceholder(?string $cover): string {
           <h3 class="user--name"><?= htmlspecialchars($_SESSION['user']['name']) ?></h3>
           <span class="user--status"><?= User::isAdmin() ? 'Admin' : 'Customer' ?></span>
         </div>
+        <a class="btn btn--ghost" href="auth/change_password.php">Change password</a>
         <a class="btn btn--ghost" href="auth/logout.php">Log out</a>
       </div>
     </nav>

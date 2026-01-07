@@ -61,6 +61,18 @@ class User {
         return false;
     }
 
+    public function changePassword(int $userId, string $current, string $new): bool {
+        $stmt = $this->db->prepare("SELECT password_hash FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $hash = $stmt->fetchColumn();
+        if (!$hash || !password_verify($current, $hash)) {
+            return false;
+        }
+        $newHash = password_hash($new, PASSWORD_DEFAULT);
+        $update = $this->db->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+        return $update->execute([$newHash, $userId]);
+    }
+
     public static function isAdmin() {
         return isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin';
     }

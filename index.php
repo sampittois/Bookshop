@@ -30,64 +30,18 @@ if (!User::isLoggedIn()) {
 }
 
 $db = Database::connect();
+$categoryModel = new Category();
+$bookModel = new Book();
 
-$selectedCategory = $_GET['category'] ?? '';
-$searchTerm = $_GET['search'] ?? '';
+$selectedCategory = (isset($_GET['category']) && $_GET['category'] !== '') ? (int) $_GET['category'] : null;
+$searchTerm = trim($_GET['search'] ?? '');
 $sort = $_GET['sort'] ?? '';
 
-$categories = $db->query("SELECT id, name FROM categories ORDER BY name ASC")
-    ->fetchAll(PDO::FETCH_ASSOC);
+$categories = $categoryModel->getAll();
 
-$baseQuery = "
-    SELECT b.*, c.name AS category
-    FROM books b
-    LEFT JOIN categories c ON c.id = b.category_id
-    WHERE 1=1
-";
+$libraryBooks = $bookModel->getFiltered($selectedCategory, $searchTerm, $sort);
 
-$params = [];
-
-if (!empty($selectedCategory)) {
-    $baseQuery .= " AND b.category_id = :category";
-    $params['category'] = $selectedCategory;
-}
-
-if (!empty($searchTerm)) {
-    $baseQuery .= " AND b.title LIKE :search";
-    $params['search'] = "%$searchTerm%";
-}
-
-$orderBy = '';
-switch ($sort) {
-    case 'name_asc':
-        $orderBy = ' ORDER BY b.title ASC';
-        break;
-    case 'name_desc':
-        $orderBy = ' ORDER BY b.title DESC';
-        break;
-    case 'price_low':
-        $orderBy = ' ORDER BY b.price ASC';
-        break;
-    case 'price_high':
-        $orderBy = ' ORDER BY b.price DESC';
-        break;
-    default:
-        $orderBy = ' ORDER BY b.title ASC';
-        break;
-}
-
-$libraryStmt = $db->prepare($baseQuery . $orderBy);
-$libraryStmt->execute($params);
-$libraryBooks = $libraryStmt->fetchAll(PDO::FETCH_ASSOC);
-
-$newArrivalsStmt = $db->query("
-    SELECT b.*, c.name AS category
-    FROM books b
-    LEFT JOIN categories c ON c.id = b.category_id
-    ORDER BY b.id DESC
-    LIMIT 6
-");
-$newArrivals = $newArrivalsStmt->fetchAll(PDO::FETCH_ASSOC);
+$newArrivals = $bookModel->getNewArrivals(6);
 
 function coverOrPlaceholder(?string $cover): string {
     return $cover && trim($cover) !== '' ? $cover : './img/placeholder.png';
@@ -117,6 +71,7 @@ function coverOrPlaceholder(?string $cover): string {
         <a role="listitem" href="index.php" aria-current="page">Home</a>
         <a role="listitem" href="admin/books.php">Manage</a>
         <a role="listitem" href="cart.php">Cart</a>
+        <a role="listitem" href="orders.php">Orders</a>
       </div>
       <div class="loggedIn" aria-label="Signed in user">
         <div class="user--avatar" aria-hidden="true"><img src="./img/pfp.jpeg" alt=""></div>
@@ -124,6 +79,7 @@ function coverOrPlaceholder(?string $cover): string {
           <h3 class="user--name"><?= htmlspecialchars($_SESSION['user']['name']) ?></h3>
           <span class="user--status"><?= User::isAdmin() ? 'Admin' : 'Customer' ?></span>
         </div>
+        <a class="btn btn--ghost" href="auth/change_password.php">Change password</a>
         <a class="btn btn--ghost" href="auth/logout.php">Log out</a>
       </div>
     </nav>
@@ -149,11 +105,13 @@ function coverOrPlaceholder(?string $cover): string {
 
     <section class="filters" aria-label="Library filters">
       <form class="filter" method="get" action="">
+        <input type="hidden" name="search" value="<?= htmlspecialchars($searchTerm) ?>">
+        <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
         <label for="category">Category</label>
         <select id="category" name="category" onchange="this.form.submit()">
           <option value="">All categories</option>
           <?php foreach ($categories as $category): ?>
-            <option value="<?= htmlspecialchars($category['id']) ?>" <?= $selectedCategory == $category['id'] ? 'selected' : '' ?>>
+            <option value="<?= htmlspecialchars($category['id']) ?>" <?= $selectedCategory === (int) $category['id'] ? 'selected' : '' ?>>
               <?= htmlspecialchars($category['name']) ?>
             </option>
           <?php endforeach; ?>
@@ -161,7 +119,8 @@ function coverOrPlaceholder(?string $cover): string {
       </form>
 
       <form class="filter filter--wide" method="get" action="">
-        <input type="hidden" name="category" value="<?= htmlspecialchars($selectedCategory) ?>">
+        <input type="hidden" name="category" value="<?= $selectedCategory !== null ? (int) $selectedCategory : '' ?>">
+        <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
         <label class="sr-only" for="search">Search by title</label>
         <div class="input-group">
           <span aria-hidden="true">🔍</span>
@@ -178,7 +137,7 @@ function coverOrPlaceholder(?string $cover): string {
       </form>
 
       <form class="filter" method="get" action="">
-        <input type="hidden" name="category" value="<?= htmlspecialchars($selectedCategory) ?>">
+        <input type="hidden" name="category" value="<?= $selectedCategory !== null ? (int) $selectedCategory : '' ?>">
         <input type="hidden" name="search" value="<?= htmlspecialchars($searchTerm) ?>">
         <label for="sort">Sort</label>
         <select id="sort" name="sort" onchange="this.form.submit()">

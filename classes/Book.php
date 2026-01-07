@@ -10,8 +10,50 @@ class Book {
         return $this->db->query("
             SELECT books.*, categories.name AS category
             FROM books
-            JOIN categories ON books.category_id = categories.id
+            LEFT JOIN categories ON books.category_id = categories.id
+            ORDER BY books.title ASC
         ")->fetchAll();
+    }
+
+    public function getFiltered(?int $categoryId, string $searchTerm = '', string $sort = ''): array {
+        $query = "
+            SELECT books.*, categories.name AS category
+            FROM books
+            LEFT JOIN categories ON books.category_id = categories.id
+            WHERE 1=1
+        ";
+        $params = [];
+
+        if (!empty($categoryId)) {
+            $query .= " AND books.category_id = :category";
+            $params['category'] = $categoryId;
+        }
+
+        if ($searchTerm !== '') {
+            $query .= " AND books.title LIKE :search";
+            $params['search'] = "%$searchTerm%";
+        }
+
+        switch ($sort) {
+            case 'name_asc':
+                $query .= " ORDER BY books.title ASC";
+                break;
+            case 'name_desc':
+                $query .= " ORDER BY books.title DESC";
+                break;
+            case 'price_low':
+                $query .= " ORDER BY books.price ASC";
+                break;
+            case 'price_high':
+                $query .= " ORDER BY books.price DESC";
+                break;
+            default:
+                $query .= " ORDER BY books.title ASC";
+        }
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 
     public function getByCategory($categoryId) {
@@ -23,24 +65,48 @@ class Book {
     }
 
     public function getById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM books WHERE id = ?");
+        $stmt = $this->db->prepare("\
+            SELECT books.*, categories.name AS category
+            FROM books
+            LEFT JOIN categories ON books.category_id = categories.id
+            WHERE books.id = ?
+            LIMIT 1
+        ");
         $stmt->execute([$id]);
         return $stmt->fetch();
     }
 
+    public function getByIds(array $ids): array {
+        if (empty($ids)) return [];
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $this->db->prepare("SELECT books.*, categories.name AS category
+            FROM books
+            LEFT JOIN categories ON books.category_id = categories.id
+            WHERE books.id IN ($placeholders)");
+        $stmt->execute($ids);
+        return $stmt->fetchAll();
+    }
+
+    public function getNewArrivals(int $limit = 6): array {
+        $stmt = $this->db->prepare("SELECT books.*, categories.name AS category
+            FROM books
+            LEFT JOIN categories ON books.category_id = categories.id
+            ORDER BY books.id DESC
+            LIMIT ?");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     public function create($data) {
-        $stmt = $this->db->prepare("
-            INSERT INTO books (category_id, title, description, price, cover_image, stock)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ");
+        $stmt = $this->db->prepare("INSERT INTO books (category_id, title, description, price, cover_image, stock, author)
+            VALUES (?, ?, ?, ?, ?, ?, ?)");
         return $stmt->execute($data);
     }
 
     public function update($id, $data) {
-        $stmt = $this->db->prepare("
-            UPDATE books SET category_id=?, title=?, description=?, price=?, cover_image=?, stock=?
-            WHERE id=?
-        ");
+        $stmt = $this->db->prepare("UPDATE books SET category_id=?, title=?, description=?, price=?, cover_image=?, stock=?, author=?
+            WHERE id=?");
         return $stmt->execute([...$data, $id]);
     }
 

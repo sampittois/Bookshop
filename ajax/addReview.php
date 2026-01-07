@@ -2,16 +2,24 @@
 require_once "../config.php";
 
 if (!User::isLoggedIn()) {
-    echo json_encode(["success" => false]);
+    header("Location: ../auth/login.php");
     exit;
 }
 
-$review = new Review();
-$review->add(
-    $_SESSION['user']['id'],
-    $_POST['book_id'],
-    $_POST['rating'],
-    htmlspecialchars($_POST['comment'])
-);
+$bookId = (int) ($_POST['book_id'] ?? 0);
+$rating = (int) ($_POST['rating'] ?? 0);
+$comment = trim($_POST['comment'] ?? '');
 
-echo json_encode(["success" => true]);
+if ($bookId > 0 && $rating >= 1 && $rating <= 5 && $comment !== '') {
+    $review = new Review();
+    $review->add(
+        $_SESSION['user']['id'],
+        $bookId,
+        $rating,
+        htmlspecialchars($comment)
+    );
+}
+
+$redirect = $_SERVER['HTTP_REFERER'] ?? '../book.php?id=' . $bookId;
+header("Location: $redirect");
+exit;
