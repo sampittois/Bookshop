@@ -3,7 +3,6 @@ FROM php:8.2-apache
 RUN a2enmod rewrite
 RUN docker-php-ext-install pdo pdo_mysql mysqli
 
-# Serve from root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html
 
 RUN echo '<Directory /var/www/html>\n\
