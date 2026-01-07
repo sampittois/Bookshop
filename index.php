@@ -3,30 +3,30 @@ require_once "config.php";
 
 // Auto-create default users if they don't exist
 try {
-    $user = new User();
+  $user = new User();
 
-    $user->createUser(
-        'Admin User',
-        'admin@admin.com',
-        'Admin',
-        'admin',
-        1000.00
-    );
+  $user->createUser(
+    'Admin User',
+    'admin@admin.com',
+    'Admin',
+    'admin',
+    1000.00
+  );
 
-    $user->createUser(
-        'Regular User',
-        'user@user.com',
-        'User',
-        'customer',
-        100.00
-    );
+  $user->createUser(
+    'Regular User',
+    'user@user.com',
+    'User',
+    'customer',
+    100.00
+  );
 } catch (Exception $e) {
-    // Users already exist or error, continue
+  // Users already exist or error, continue
 }
 
 if (!User::isLoggedIn()) {
-    header("Location: auth/login.php");
-    exit();
+  header("Location: auth/login.php");
+  exit();
 }
 
 $db = Database::connect();
@@ -43,13 +43,15 @@ $libraryBooks = $bookModel->getFiltered($selectedCategory, $searchTerm, $sort);
 
 $newArrivals = $bookModel->getNewArrivals(6);
 
-function coverOrPlaceholder(?string $cover): string {
-    return $cover && trim($cover) !== '' ? $cover : './img/placeholder.png';
+function coverOrPlaceholder(?string $cover): string
+{
+  return $cover && trim($cover) !== '' ? $cover : './img/placeholder.png';
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -61,9 +63,8 @@ function coverOrPlaceholder(?string $cover): string {
   <header class="topbar" role="banner">
     <nav class="nav" aria-label="Primary">
       <div class="brand">
-        <div class="brand__mark" aria-hidden="true">📚</div>
         <div>
-          <span class="brand__kicker">Curated Reads</span>
+          <span class="brand__kicker">Nook & Novel</span>
           <span class="brand__title">Bookshop</span>
         </div>
       </div>
@@ -130,8 +131,7 @@ function coverOrPlaceholder(?string $cover): string {
             type="text"
             value="<?= htmlspecialchars($searchTerm) ?>"
             placeholder="Search by title..."
-            aria-label="Search books by title"
-          >
+            aria-label="Search books by title">
         </div>
         <button class="btn" type="submit">Search</button>
       </form>
@@ -166,8 +166,7 @@ function coverOrPlaceholder(?string $cover): string {
               <img
                 src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>"
                 alt="Cover of <?= htmlspecialchars($book['title']) ?>"
-                loading="lazy"
-              >
+                loading="lazy">
             </div>
             <div class="book-card__body">
               <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
@@ -207,8 +206,7 @@ function coverOrPlaceholder(?string $cover): string {
                 <img
                   src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>"
                   alt="Cover of <?= htmlspecialchars($book['title']) ?>"
-                  loading="lazy"
-                >
+                  loading="lazy">
               </div>
               <div class="book-card__body">
                 <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
@@ -234,4 +232,5 @@ function coverOrPlaceholder(?string $cover): string {
     </section>
   </main>
 </body>
+
 </html>
