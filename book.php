@@ -45,7 +45,9 @@ function coverOrPlaceholder(?string $cover): string {
       </div>
       <div class="nav__links" role="list">
         <a role="listitem" href="index.php">Home</a>
-        <a role="listitem" href="admin/books.php">Manage</a>
+        <?php if (User::isAdmin()): ?>
+          <a role="listitem" href="admin/books.php">Manage</a>
+        <?php endif; ?>
         <a role="listitem" href="cart.php">Cart</a>
         <a role="listitem" href="orders.php">Orders</a>
         <a role="listitem" href="#details" aria-current="page">Details</a>
