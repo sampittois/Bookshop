@@ -65,6 +65,7 @@ body {
 }
 
 .form__field input[type="text"],
+.form__field input[type="email"],
 .form__field input[type="password"] {
     padding: 0.6rem;
     border: 1px solid var(--border);
@@ -74,6 +75,7 @@ body {
 }
 
 .form__field input[type="text"]:focus,
+.form__field input[type="email"]:focus,
 .form__field input[type="password"]:focus {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -109,4 +111,46 @@ body {
     border-radius: 10px;
     margin-bottom: 1rem;
     text-align: center;
+}
+
+.form__error p,
+.form__success p {
+    margin: 0;
+}
+
+.form__success {
+    background-color: rgba(76, 175, 80, 0.18);
+    color: rgba(76, 175, 80, 0.9);
+    padding: 0.7rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    text-align: center;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.nav--login {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.nav--login a {
+    flex: 1;
+    padding: 0.75rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
+
+.nav--login a:hover {
+    color: var(--ink);
+}
+
+.nav--login a.selected {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
 }

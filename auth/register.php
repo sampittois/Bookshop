@@ -28,43 +28,55 @@ if (!empty($_POST)) {
 <head>
   <meta charset="UTF-8">
   <title>Register - Bookshop</title>
-  <link rel="stylesheet" href="../style/style.css">
+  <link rel="stylesheet" href="../style/login.css">
 </head>
 <body>
-   <div id="app">
-    <h1>Register for Bookshop</h1>
-    <nav class="nav--login">
-        <a href="login.php">Log in</a>
-        <a class="selected" href="register.php">Sign up</a>
-    </nav>
-  
-    <?php if ($register_error): ?>
-    <div class="alert"><?= htmlspecialchars($register_error) ?></div>
-    <?php endif; ?>
-    
-    <?php if ($register_success): ?>
-    <div class="alert" style="background-color: #74948C;"><?= htmlspecialchars($register_success) ?></div>
-    <?php endif; ?>
-  
-  <form method="POST" class="form form--signup">
-    <label for="name">Name</label>
-    <input type="text" id="name" name="name" required>
-    
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email" required>
-    
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" required>
-  
-    <label for="password2">Confirm Password</label>
-    <input type="password" id="password2" name="password2" required>
-    
-    <button type="submit" class="btn">Sign Up</button>
-  </form>
-  
-  <p style="text-align: center; margin-top: 1rem; color: #CFB580;">
-    Already have an account? <a href="login.php" style="color: #CA7C4C;">Log in</a>
-  </p>
-</div>
+    <div class="shopLogin">
+        <div class="form form--login">
+            <form action="" method="post">
+                <h2 class="form__title">Create Account</h2>
+                <nav class="nav--login">
+                    <a href="login.php">Log in</a>
+                    <a class="selected" href="register.php">Sign up</a>
+                </nav>
+
+                <?php if ($register_error): ?>
+                    <div class="form__error">
+                        <p><?= htmlspecialchars($register_error) ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($register_success): ?>
+                    <div class="form__success">
+                        <p><?= htmlspecialchars($register_success) ?></p>
+                    </div>
+                <?php endif; ?>
+
+                <div class="form__field">
+                    <label for="name">Name</label>
+                    <input id="name" type="text" name="name" required>
+                </div>
+
+                <div class="form__field">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" name="email" required>
+                </div>
+
+                <div class="form__field">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" required>
+                </div>
+
+                <div class="form__field">
+                    <label for="password2">Confirm Password</label>
+                    <input id="password2" type="password" name="password2" required>
+                </div>
+
+                <div class="form__field">
+                    <input type="submit" value="Sign up" class="btn btn--primary">
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

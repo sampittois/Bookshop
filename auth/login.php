@@ -25,18 +25,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Nook & Novel login</title>
+    <meta charset="UTF-8">
+    <title>Nook & Novel login</title>
     <link rel="stylesheet" href="../style/login.css">
 </head>
+
 <body>
     <div class="shopLogin">
         <div class="form form--login">
             <form action="" method="post">
                 <h2 class="form__title">Sign In</h2>
-
-                <?php if(isset($login_error)): ?>
+                <nav class="nav--login">
+                    <a class="selected" href="login.php">Log in</a>
+                    <a href="register.php">Sign up</a>
+                </nav>
+                <?php if (isset($login_error)): ?>
 
                     <div class="form__error">
                         <p>
@@ -61,4 +66,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </body>
+
 </html>
