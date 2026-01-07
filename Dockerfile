@@ -1,23 +1,19 @@
 FROM php:8.2-apache
 
-# Enable Apache rewrite
+# Enable Apache modules
 RUN a2enmod rewrite
 
-# Install MySQL support
+# Install MySQL extensions
 RUN docker-php-ext-install pdo pdo_mysql mysqli
 
-# Set Apache document root to /public
+# Set document root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+# Update Apache configs to use /public
+RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf
+RUN sed -ri 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
-# 🔑 ALLOW ACCESS TO PUBLIC FOLDER
-RUN printf '<Directory "/var/www/html/public">\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>\n' >> /etc/apache2/apache2.conf
-
-COPY . /var/www/html/
-
-EXPOSE 80
+# 🔐 Explicitly allow access to /public
+RUN echo '<Directory /var/www/html/public>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\
