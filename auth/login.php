@@ -1,70 +1,66 @@
 <?php
-require_once "../config.php";
-
-$login_error = "";
-$debug_info = "";
-
-// Ensure users exist
-try {
-  $userObj = new User();
-  $userObj->createUser('Admin User', 'admin@admin.com', 'Admin', 'admin', 1000.00);
-  $userObj->createUser('Regular User', 'user@user.com', 'User', 'customer', 100.00);
-} catch (Exception $e) {
-  $debug_info = "Setup error: " . $e->getMessage();
-}
-
-if (!empty($_POST)) {
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    
-    $user = new User();
-    if ($user->login($email, $password)) {
-        header("Location: ../index.php");
-        exit();
-    } else {
-        $login_error = "Email or password is incorrect. Please try again.";
+    function validLogin($email, $password) {
+        if($email === "user@user.com" && $password === "User") {
+            return true;
+        }
+        if($email === "admin@admin.com" && $password === "Admin") {
+            return true;
+        }
+        return false;
     }
-}
+
+    if(!empty($_POST)) {
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+        
+        if(validLogin($email, $password)) {
+            $salt = "cnbhvgryeujifkjn*@++++gftyzshinjhzisv%%ghj";
+            $cookieVal = $email . "," . md5($email.$salt);
+            setcookie("loggedin", $cookieVal, time() + (60*60*24*30)); // 1 month
+            header("Location: index.php");
+            exit();
+        } else {
+            $login_error = "Couldn't log you in with those details.";
+        }
+    }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Bookshop</title>
-  <link rel="stylesheet" href="../style/style.css">
+  <title>Nook & Novel login</title>
+  <link rel="stylesheet" href="../style/login.css">
 </head>
 <body>
-   <div id="app">
-    <h1>Log in to Bookshop</h1>
-    <nav class="nav--login">
-        <a class="selected" href="login.php">Log in</a>
-        <a href="register.php">Sign up</a>
-    </nav>
-  
-    <?php if ($login_error): ?>
-    <div class="alert"><?= htmlspecialchars($login_error) ?></div>
-    <?php endif; ?>
-    
-    <?php if ($debug_info): ?>
-    <div class="alert"><?= htmlspecialchars($debug_info) ?></div>
-    <?php endif; ?>
-  
-  <form method="POST" class="form form--login">
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
-  
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" required>
-    
-    <button type="submit" class="btn">Log In</button>
-  </form>
-  
-  <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.1); border-radius: 6px; font-size: 0.85rem;">
-    <strong>Test Accounts:</strong><br>
-    admin@admin.com / Admin<br>
-    user@user.com / User
-  </div>
-</div>
+    <div class="shopLogin">
+        <div class="form form--login">
+            <form action="" method="post">
+                <h2 form__title>Sign In</h2>
+
+                <?php if(isset($login_error)): ?>
+
+                    <div class="form__error">
+                        <p>
+                            <?php echo $login_error; ?>
+                        </p>
+                    </div>
+                <?php endif; ?>
+
+                <div class="form__field">
+                    <label for="Email">Email</label>
+                    <input type="text" name="email">
+                </div>
+                <div class="form__field">
+                    <label for="Password">Password</label>
+                    <input type="password" name="password">
+                </div>
+
+                <div class="form__field">
+                    <input type="submit" value="Sign in" class="btn btn--primary">
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

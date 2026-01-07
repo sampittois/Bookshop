@@ -142,7 +142,7 @@ function coverOrPlaceholder(?string $cover): string
         <input type="hidden" name="search" value="<?= htmlspecialchars($searchTerm) ?>">
         <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
         <label for="category">Category</label>
-        <select id="category" name="category" onchange="this.form.submit()">
+        <select id="category" name="category">
           <option value="">All categories</option>
           <?php foreach ($categories as $category): ?>
             <option value="<?= htmlspecialchars($category['id']) ?>" <?= $selectedCategory === (int) $category['id'] ? 'selected' : '' ?>>
@@ -152,7 +152,7 @@ function coverOrPlaceholder(?string $cover): string
         </select>
       </form>
 
-      <form class="filter filter--wide" method="get" action="">
+      <form id="search-form" class="filter filter--wide" method="get" action="">
         <input type="hidden" name="category" value="<?= $selectedCategory !== null ? (int) $selectedCategory : '' ?>">
         <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
         <label class="sr-only" for="search">Search by title</label>
@@ -169,11 +169,11 @@ function coverOrPlaceholder(?string $cover): string
         <button class="btn" type="submit">Search</button>
       </form>
 
-      <form class="filter" method="get" action="">
+      <form id="sort-form" class="filter" method="get" action="">
         <input type="hidden" name="category" value="<?= $selectedCategory !== null ? (int) $selectedCategory : '' ?>">
         <input type="hidden" name="search" value="<?= htmlspecialchars($searchTerm) ?>">
         <label for="sort">Sort</label>
-        <select id="sort" name="sort" onchange="this.form.submit()">
+        <select id="sort" name="sort">
           <option value="">Title (A-Z)</option>
           <option value="name_desc" <?= $sort === 'name_desc' ? 'selected' : '' ?>>Title (Z-A)</option>
           <option value="price_low" <?= $sort === 'price_low' ? 'selected' : '' ?>>Price (Low-High)</option>
@@ -193,44 +193,103 @@ function coverOrPlaceholder(?string $cover): string
         <div class="section__pill"><?= count($libraryBooks) ?> titles</div>
       </div>
 
-      <?php if (empty($libraryBooks)): ?>
-        <div class="empty-state" role="status">
-          <p>No books match your filters yet. Try clearing the search or picking a different category.</p>
-          <a class="btn btn--ghost" href="index.php">Reset filters</a>
-        </div>
-      <?php else: ?>
-        <div class="book-grid" role="list">
-          <?php foreach ($libraryBooks as $book): ?>
-            <article class="book-card" role="listitem">
-              <div class="book-card__cover">
-                <img
-                  src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>"
-                  alt="Cover of <?= htmlspecialchars($book['title']) ?>"
-                  loading="lazy">
-              </div>
-              <div class="book-card__body">
-                <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
-                <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
-                <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
-                <p class="book-card__desc"><?= htmlspecialchars($book['description'] ?? 'No description available yet.') ?></p>
-                <div class="book-card__meta">
-                  <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>
-                  <span class="pill">In stock: <?= htmlspecialchars($book['stock'] ?? '—') ?></span>
+      <div id="library-results">
+        <?php if (empty($libraryBooks)): ?>
+          <div class="empty-state" role="status">
+            <p>No books match your filters yet. Try clearing the search or picking a different category.</p>
+            <a class="btn btn--ghost" href="index.php">Reset filters</a>
+          </div>
+        <?php else: ?>
+          <div class="book-grid" role="list">
+            <?php foreach ($libraryBooks as $book): ?>
+              <article class="book-card" role="listitem">
+                <div class="book-card__cover">
+                  <img
+                    src="<?= htmlspecialchars(coverOrPlaceholder($book['cover_image'] ?? null)) ?>"
+                    alt="Cover of <?= htmlspecialchars($book['title']) ?>"
+                    loading="lazy">
                 </div>
-                <div class="book-card__actions">
-                  <a class="btn btn--small" href="book.php?id=<?= $book['id'] ?>">View details</a>
-                  <form method="post" action="ajax/addToCart.php" class="inline-form">
-                    <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
-                    <button class="btn btn--outline btn--small" type="submit">Add to cart</button>
-                  </form>
+                <div class="book-card__body">
+                  <p class="book-card__category"><?= htmlspecialchars($book['category'] ?? 'Uncategorized') ?></p>
+                  <h3 class="book-card__title"><?= htmlspecialchars($book['title']) ?></h3>
+                  <p class="book-card__author">by <?= htmlspecialchars($book['author'] ?? 'Unknown author') ?></p>
+                  <p class="book-card__desc"><?= htmlspecialchars($book['description'] ?? 'No description available yet.') ?></p>
+                  <div class="book-card__meta">
+                    <span class="book-card__price">€<?= number_format($book['price'], 2) ?></span>
+                    <span class="pill">In stock: <?= htmlspecialchars($book['stock'] ?? '—') ?></span>
+                  </div>
+                  <div class="book-card__actions">
+                    <a class="btn btn--small" href="book.php?id=<?= $book['id'] ?>">View details</a>
+                    <form method="post" action="ajax/addToCart.php" class="inline-form">
+                      <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
+                      <button class="btn btn--outline btn--small" type="submit">Add to cart</button>
+                    </form>
+                  </div>
                 </div>
-              </div>
-            </article>
-          <?php endforeach; ?>
-        </div>
-      <?php endif; ?>
+              </article>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </div>
     </section>
   </main>
+  <script>
+    (function() {
+      const categorySelect = document.getElementById('category');
+      const sortSelect = document.getElementById('sort');
+      const searchForm = document.getElementById('search-form');
+      const searchInput = document.getElementById('search');
+      const resultsContainer = document.getElementById('library-results');
+      const libraryPill = document.querySelector('#library .section__pill');
+
+      async function reloadBooks(params) {
+        const query = new URLSearchParams(params);
+        const res = await fetch('ajax/filterProducts.php?' + query.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const html = await res.text();
+        resultsContainer.innerHTML = html;
+        // Update count pill based on rendered cards
+        const count = resultsContainer.querySelectorAll('.book-card').length;
+        if (libraryPill) libraryPill.textContent = (count || 0) + ' titles';
+        // Update URL without reload
+        if (window.history && window.history.pushState) {
+          const url = new URL(window.location.href);
+          url.searchParams.set('category', params.category || '');
+          url.searchParams.set('search', params.search || '');
+          url.searchParams.set('sort', params.sort || '');
+          window.history.pushState({}, '', url);
+        }
+      }
+
+      function currentParams() {
+        return {
+          category: categorySelect ? categorySelect.value : '',
+          search: searchInput ? searchInput.value.trim() : '',
+          sort: sortSelect ? sortSelect.value : ''
+        };
+      }
+
+      if (categorySelect) {
+        categorySelect.addEventListener('change', (e) => {
+          e.preventDefault();
+          reloadBooks(currentParams());
+        });
+      }
+
+      if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => {
+          e.preventDefault();
+          reloadBooks(currentParams());
+        });
+      }
+
+      if (searchForm) {
+        searchForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          reloadBooks(currentParams());
+        });
+      }
+    })();
+  </script>
 </body>
 
 </html>
